@@ -1,0 +1,15 @@
+language: go
+go:
+  - 1.6.4
+  - 1.7.4
+  - tip
+script:
+  - go get github.com/onsi/ginkgo
+  - go get github.com/onsi/gomega
+  - go test -coverprofile=coverage.txt -covermode=atomic
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
