@@ -17,7 +17,7 @@ This can be used to add behavior, such as logs or metrics, into a function witho
 * MakeDecorator: generate a decorator to a certain function type which can be used later.
 
 |      Original       |          Decorated           |
-| :-----------------: | :--------------------------: |
+| ------------------- | ---------------------------- |
 | func Myfunc(in)out{ | func MyfuncDecorated(in)out{ |
 |     ......          |    injectedBefore(in)        |
 |     do someting     |    out = MyFunc(in)          |

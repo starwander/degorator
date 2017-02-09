@@ -179,7 +179,7 @@ func checkDecorator(decorator interface{}) (decoFunc reflect.Value, err error) {
 		}
 	}
 	if decoFunc.Type().In(0).NumOut() != decoFunc.Type().Out(0).NumOut() {
-		err = fmt.Errorf("Decoratee function  and decorated function must have same ouput para number.")
+		err = fmt.Errorf("Decoratee function  and decorated function must have same output para number.")
 		return
 	}
 	for i := 0; i < decoFunc.Type().In(0).NumOut(); i++ {
