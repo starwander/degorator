@@ -3,14 +3,14 @@
 package degorator
 
 import (
+	"errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"errors"
 )
 
 var _ = Describe("Tests of Decorate api", func() {
-	type MyFunc func(string) (error)
-	type MyFuncSlice func(...string) (error)
+	type MyFunc func(string) error
+	type MyFuncSlice func(...string) error
 	var (
 		myCounter *MyCounter
 
@@ -39,9 +39,17 @@ var _ = Describe("Tests of Decorate api", func() {
 		})
 
 		It("Given an target function, when inject functions with different input or output para number, then return error", func() {
+			var test int
 			Expect(Decorate(&myFuncDecorated, myFunc, nil, nil)).ShouldNot(HaveOccurred())
+			Expect(Decorate(nil, myFunc, nil, nil)).Should(HaveOccurred())
+			Expect(Decorate(func(string) error {
+				return nil
+			}, myFunc, nil, nil)).Should(HaveOccurred())
+			Expect(Decorate(&test, myFunc, nil, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, nil, nil, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, "func", nil, nil)).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, test, nil)).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, nil, test)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, func() {}, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, func(s1 string, s2 string) {}, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, nil, func() {})).Should(HaveOccurred())
@@ -115,12 +123,12 @@ var _ = Describe("Tests of Decorate api", func() {
 })
 
 var _ = Describe("Tests of MakeDecorator api", func() {
-	type MyFunc func(string) (error)
-	type MyFuncSlice func(...string) (error)
+	type MyFunc func(string) error
+	type MyFuncSlice func(...string) error
 	var (
-		myCounter *MyCounter
-	        myDecorator func(MyFunc) MyFunc
-	        mySliceDecorator func(MyFuncSlice) MyFuncSlice
+		myCounter        *MyCounter
+		myDecorator      func(MyFunc) MyFunc
+		mySliceDecorator func(MyFuncSlice) MyFuncSlice
 
 		myFunc MyFunc = func(s string) error {
 			if s == "error" {
@@ -145,14 +153,28 @@ var _ = Describe("Tests of MakeDecorator api", func() {
 		})
 
 		It("Given an target function, when inject functions with different input or output para number, then return error", func() {
+			var test int
 			Expect(MakeDecorator(&myDecorator, nil, nil)).ShouldNot(HaveOccurred())
+			Expect(MakeDecorator(nil, nil, nil)).Should(HaveOccurred())
+			Expect(MakeDecorator(myDecorator, nil, nil)).Should(HaveOccurred())
+			Expect(MakeDecorator(&test, nil, nil)).Should(HaveOccurred())
+			var wrongType1 func(MyFunc)
+			Expect(MakeDecorator(&wrongType1, nil, nil)).Should(HaveOccurred())
+			var wrongType2 func(error) error
+			Expect(MakeDecorator(&wrongType2, nil, nil)).Should(HaveOccurred())
+			var wrongType3 func(func(string, string)) func(string)
+			Expect(MakeDecorator(&wrongType3, nil, nil)).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, test, nil)).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, nil, test)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func() {}, nil)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func(s1 string, s2 string) {}, nil)).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, func(n int) {}, nil)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, nil, func() {})).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, nil, func(e1 error, e2 error) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, nil, func(n int) {})).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func(s string) {}, func(e1 error, e2 error) {})).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func(s1 string, s2 string) {}, func(e error) {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, func(s1 string, s2 string) {}, func(e1 error, e2 error) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, func(n int) {}, func(n int) {})).Should(HaveOccurred())
 		})
 
 		It("Given an target function, when inject functions with different input or output para type, then return error", func() {
