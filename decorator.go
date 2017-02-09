@@ -1,6 +1,6 @@
 // Copyright(c) 2017 Ethan Zhuang <zhuangwj@gmail.com>.
 
-// Degorator implements the decorator pattern in golang.
+// Package degorator implements the decorator pattern in golang.
 // This can be used to add behavior, such as logs or metrics, into a function without affecting the original behavior at runtime.
 package degorator
 
@@ -125,12 +125,12 @@ func checkInjection(targetType reflect.Type, before interface{}, after interface
 			return
 		}
 		if beforeFunc.Type().NumIn() != targetType.NumIn() {
-			err = fmt.Errorf("The input para number of the funtion injected before must be same with the input para number of the target funtion.")
+			err = fmt.Errorf("The input para number of the function injected before must be same with the input para number of the target function.")
 			return
 		}
 		for i := 0; i < beforeFunc.Type().NumIn(); i++ {
 			if beforeFunc.Type().In(i) != targetType.In(i) {
-				err = fmt.Errorf("The input para types of the funtion injected before must be same with the input para types of the target funtion.")
+				err = fmt.Errorf("The input para types of the function injected before must be same with the input para types of the target function.")
 				return
 			}
 		}
@@ -142,12 +142,12 @@ func checkInjection(targetType reflect.Type, before interface{}, after interface
 			return
 		}
 		if afterFunc.Type().NumIn() != targetType.NumOut() {
-			err = fmt.Errorf("The input para number of the funtion injected after must be same with the output para number of the target funtion.")
+			err = fmt.Errorf("The input para number of the function injected after must be same with the output para number of the target function.")
 			return
 		}
 		for i := 0; i < afterFunc.Type().NumIn(); i++ {
 			if afterFunc.Type().In(i) != targetType.Out(i) {
-				err = fmt.Errorf("The input para types of the funtion injected after must be same with the output para types of the target funtion.")
+				err = fmt.Errorf("The input para types of the function injected after must be same with the output para types of the target function.")
 				return
 			}
 		}
