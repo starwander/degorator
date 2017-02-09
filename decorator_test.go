@@ -164,6 +164,12 @@ var _ = Describe("Tests of MakeDecorator api", func() {
 			Expect(MakeDecorator(&wrongType2, nil, nil)).Should(HaveOccurred())
 			var wrongType3 func(func(string, string)) func(string)
 			Expect(MakeDecorator(&wrongType3, nil, nil)).Should(HaveOccurred())
+			var wrongType4 func(func(string)) func(int)
+			Expect(MakeDecorator(&wrongType4, nil, nil)).Should(HaveOccurred())
+			var wrongType5 func(func(string) error) func(string)
+			Expect(MakeDecorator(&wrongType5, nil, nil)).Should(HaveOccurred())
+			var wrongType6 func(func(string) error) func(string) int
+			Expect(MakeDecorator(&wrongType6, nil, nil)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, test, nil)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, nil, test)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func() {}, nil)).Should(HaveOccurred())

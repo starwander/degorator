@@ -157,13 +157,23 @@ func checkDecorator(decorator interface{}) (decoFunc reflect.Value, err error) {
 		err = fmt.Errorf("Decorator function's input para type and output para type must be function type.")
 		return
 	}
-	if decoFunc.Type().In(0).NumIn() != decoFunc.Type().NumOut() {
-		err = fmt.Errorf("Decoratee function must have same input and ouput para number.")
+	if decoFunc.Type().In(0).NumIn() != decoFunc.Type().Out(0).NumIn() {
+		err = fmt.Errorf("Decoratee function and decorated function must have same input para number.")
 		return
 	}
 	for i := 0; i < decoFunc.Type().In(0).NumIn(); i++ {
 		if decoFunc.Type().In(0).In(i) != decoFunc.Type().Out(0).In(i) {
-			err = fmt.Errorf("Decoratee function must have same input and output para type.")
+			err = fmt.Errorf("Decoratee function and decorated function must have same input para type.")
+			return
+		}
+	}
+	if decoFunc.Type().In(0).NumOut() != decoFunc.Type().Out(0).NumOut() {
+		err = fmt.Errorf("Decoratee function  and decorated function must have same ouput para number.")
+		return
+	}
+	for i := 0; i < decoFunc.Type().In(0).NumOut(); i++ {
+		if decoFunc.Type().In(0).Out(i) != decoFunc.Type().Out(0).Out(i) {
+			err = fmt.Errorf("Decoratee function  and decorated function must have same output para type.")
 			return
 		}
 	}
