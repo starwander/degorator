@@ -40,6 +40,8 @@ var _ = Describe("Tests of Decorate api", func() {
 
 		It("Given an target function, when inject functions with different input or output para number, then return error", func() {
 			Expect(Decorate(&myFuncDecorated, myFunc, nil, nil)).ShouldNot(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, nil, nil, nil)).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, "func", nil, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, func() {}, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, func(s1 string, s2 string) {}, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, nil, func() {})).Should(HaveOccurred())
