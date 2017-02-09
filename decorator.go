@@ -1,5 +1,7 @@
 // Copyright(c) 2017 Ethan Zhuang <zhuangwj@gmail.com>.
 
+// Degorator implements the decorator pattern in golang.
+// This can be used to add behavior, such as logs or metrics, into a function without affecting the original behavior at runtime.
 package degorator
 
 import (
@@ -7,6 +9,11 @@ import (
 	"reflect"
 )
 
+// Decorate injects two functions(injectedBefore & injectedAfter) into the target function.
+// The argument decorated is the function after decoration.
+// The argument target is the function to be decorated.
+// The argument before is the function to be injected before the target function.
+// The argument after is the function to be injected after the target function.
 func Decorate(decorated interface{}, target interface{}, before interface{}, after interface{}) (err error) {
 	var targetFunc reflect.Value
 	var decoratedFunc reflect.Value
@@ -49,6 +56,10 @@ func Decorate(decorated interface{}, target interface{}, before interface{}, aft
 	return
 }
 
+// MakeDecorator generate a decorator to a certain function type which can be used later.
+// The argument decorator is the function to decorate target function later.
+// The argument before is the function to be injected before the target function.
+// The argument after is the function to be injected after the target function.
 func MakeDecorator(decorator interface{}, before interface{}, after interface{}) (err error) {
 	var decoFunc reflect.Value
 	var beforeFunc reflect.Value
