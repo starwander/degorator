@@ -38,7 +38,7 @@ var _ = Describe("Tests of Decorate api", func() {
 		AfterEach(func() {
 		})
 
-		It("Given an target function, when inject functions with different input or output para number, then return error", func() {
+		It("Given an target function, when the para number and type of the decorated function is invalid then return error", func() {
 			var test int
 			Expect(Decorate(&myFuncDecorated, myFunc, nil, nil)).ShouldNot(HaveOccurred())
 			Expect(Decorate(nil, myFunc, nil, nil)).Should(HaveOccurred())
@@ -48,23 +48,26 @@ var _ = Describe("Tests of Decorate api", func() {
 			Expect(Decorate(&test, myFunc, nil, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, nil, nil, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, "func", nil, nil)).Should(HaveOccurred())
+		})
+
+		It("Given an target function, when inject functions with different input or output para number or type, then return error", func() {
+			var test int
 			Expect(Decorate(&myFuncDecorated, myFunc, test, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, nil, test)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, func() {}, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, func(s1 string, s2 string) {}, nil)).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, nil, func() {})).Should(HaveOccurred())
-			Expect(Decorate(&myFuncDecorated, myFunc, nil, func(e1 error, e2 error) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, nil, func(e1 error, e2 error, s string) {})).Should(HaveOccurred())
 			Expect(Decorate(&myFuncDecorated, myFunc, func(s string) {}, func(e1 error, e2 error) {})).Should(HaveOccurred())
-			Expect(Decorate(&myFuncDecorated, myFunc, func(s1 string, s2 string) {}, func(e error) {})).Should(HaveOccurred())
-			Expect(Decorate(&myFuncDecorated, myFunc, func(s1 string, s2 string) {}, func(e1 error, e2 error) {})).Should(HaveOccurred())
-		})
-
-		It("Given an target function, when inject functions with different input or output para type, then return error", func() {
-			Expect(Decorate(&myFuncDecorated, myFunc, func(s string) {}, func(e error) {})).ShouldNot(HaveOccurred())
-			Expect(Decorate(&myFuncDecorated, myFunc, func(e error) {}, func(e error) {})).Should(HaveOccurred())
-			Expect(Decorate(&myFuncDecorated, myFunc, func(s string) {}, func(s string) {})).Should(HaveOccurred())
-			Expect(Decorate(&myFuncDecorated, myFunc, func(e error) {}, func(s string) {})).Should(HaveOccurred())
-			Expect(Decorate(&myFuncDecorated, myFunc, func(s ...string) {}, nil)).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, func(s1 string, s2 string) {}, func(e error, s string) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, func(e error) {}, func(e error, s string) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, func(s ...string) {}, func(e error, s string) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, func(s string) {}, func(s1 string, s2 string) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, func(e string) {}, func(e error, s ...string) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncDecorated, myFunc, func(s string) {}, func(e error, s string) {})).ShouldNot(HaveOccurred())
+			Expect(Decorate(&myFuncSliceDecorated, myFuncSlice, func(s string) {}, func(e error, s ...string) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncSliceDecorated, myFuncSlice, func(s ...string) {}, func(e error, s string) {})).Should(HaveOccurred())
+			Expect(Decorate(&myFuncSliceDecorated, myFuncSlice, func(s ...string) {}, func(e error, s ...string) {})).ShouldNot(HaveOccurred())
 		})
 	})
 	Context("Tests of wrapped functions", func() {
@@ -108,7 +111,7 @@ var _ = Describe("Tests of Decorate api", func() {
 		})
 
 		It("Given an target function, when inject functions before and after, then the injected functions should be invoked correctly", func() {
-			Expect(Decorate(&myFuncSliceDecorated, myFuncSlice, myCounter.addCountSlice, myCounter.addError)).ShouldNot(HaveOccurred())
+			Expect(Decorate(&myFuncSliceDecorated, myFuncSlice, myCounter.addCountSlice, myCounter.addErrorSlice)).ShouldNot(HaveOccurred())
 			myFuncSliceDecorated("1")
 			Expect(myCounter.error).Should(Equal(0))
 			myFuncSliceDecorated("error")
@@ -152,7 +155,7 @@ var _ = Describe("Tests of MakeDecorator api", func() {
 		AfterEach(func() {
 		})
 
-		It("Given an target function, when inject functions with different input or output para number, then return error", func() {
+		It("Given an target function, when decorator's para number and type is invalid, then return error", func() {
 			var test int
 			Expect(MakeDecorator(&myDecorator, nil, nil)).ShouldNot(HaveOccurred())
 			Expect(MakeDecorator(nil, nil, nil)).Should(HaveOccurred())
@@ -170,25 +173,27 @@ var _ = Describe("Tests of MakeDecorator api", func() {
 			Expect(MakeDecorator(&wrongType5, nil, nil)).Should(HaveOccurred())
 			var wrongType6 func(func(string) error) func(string) int
 			Expect(MakeDecorator(&wrongType6, nil, nil)).Should(HaveOccurred())
+		})
+
+		It("Given an target function, when inject functions with invalid input or output para number or type, then return error", func() {
+			var test int
 			Expect(MakeDecorator(&myDecorator, test, nil)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, nil, test)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func() {}, nil)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func(s1 string, s2 string) {}, nil)).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func(n int) {}, nil)).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, nil, func() {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, nil, func(e1 error, e2 error) {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, nil, func(n int) {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, func(s string) {}, func(e1 error, e2 error) {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, func(s1 string, s2 string) {}, func(e error) {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, func(n int) {}, func(n int) {})).Should(HaveOccurred())
-		})
-
-		It("Given an target function, when inject functions with different input or output para type, then return error", func() {
-			Expect(MakeDecorator(&myDecorator, func(s string) {}, func(e error) {})).ShouldNot(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, func(e error) {}, func(e error) {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, func(s string) {}, func(s string) {})).Should(HaveOccurred())
-			Expect(MakeDecorator(&myDecorator, func(e error) {}, func(s string) {})).Should(HaveOccurred())
 			Expect(MakeDecorator(&myDecorator, func(s ...string) {}, nil)).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, nil, func() {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, nil, func(e error, s1 string, s2 string) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, nil, func(n int, s string) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, func(s string) {}, func(e error, s1 string, s2 string) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, func(s1 string, s2 string) {}, func(s string, e error) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, func(s1 string, s2 string) {}, func(e error, s1 string, s2 string) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, func(n int) {}, func(n int) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&myDecorator, func(s string) {}, func(e error, s string) {})).ShouldNot(HaveOccurred())
+			Expect(MakeDecorator(&mySliceDecorator, func(s string) {}, nil)).Should(HaveOccurred())
+			Expect(MakeDecorator(&mySliceDecorator, nil, func(e error, s string) {})).Should(HaveOccurred())
+			Expect(MakeDecorator(&mySliceDecorator, nil, func(e error, s ...string) {})).ShouldNot(HaveOccurred())
 		})
 	})
 	Context("Tests of wrapped functions", func() {
@@ -235,7 +240,7 @@ var _ = Describe("Tests of MakeDecorator api", func() {
 		})
 
 		It("Given an target function, when inject functions before and after, then the injected functions should be invoked correctly", func() {
-			Expect(MakeDecorator(&mySliceDecorator, myCounter.addCountSlice, myCounter.addError)).ShouldNot(HaveOccurred())
+			Expect(MakeDecorator(&mySliceDecorator, myCounter.addCountSlice, myCounter.addErrorSlice)).ShouldNot(HaveOccurred())
 			myFuncSlice = mySliceDecorator(myFuncSlice)
 			myFuncSlice("1")
 			Expect(myCounter.error).Should(Equal(0))
@@ -262,7 +267,7 @@ func (m *MyCounter) addCount(s string) {
 	m.number++
 }
 
-func (m *MyCounter) addError(err error) {
+func (m *MyCounter) addError(err error, s string) {
 	if err != nil {
 		m.error++
 	}
@@ -273,4 +278,10 @@ func (m *MyCounter) addCountSlice(s ...string) {
 		return
 	}
 	m.number++
+}
+
+func (m *MyCounter) addErrorSlice(err error, s ...string) {
+	if err != nil {
+		m.error++
+	}
 }

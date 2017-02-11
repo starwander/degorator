@@ -42,14 +42,17 @@ func Decorate(decorated interface{}, target interface{}, before interface{}, aft
 				beforeFunc.CallSlice(in)
 			}
 			out = targetFunc.CallSlice(in)
+			if after != nil {
+				afterFunc.CallSlice(append(out, in...))
+			}
 		} else {
 			if before != nil {
 				beforeFunc.Call(in)
 			}
 			out = targetFunc.Call(in)
-		}
-		if after != nil {
-			afterFunc.Call(out)
+			if after != nil {
+				afterFunc.Call(append(out, in...))
+			}
 		}
 		return
 	}))
@@ -82,14 +85,17 @@ func MakeDecorator(decorator interface{}, before interface{}, after interface{})
 					beforeFunc.CallSlice(in)
 				}
 				out = args[0].CallSlice(in)
+				if after != nil {
+					afterFunc.CallSlice(append(out, in...))
+				}
 			} else {
 				if before != nil {
 					beforeFunc.Call(in)
 				}
 				out = args[0].Call(in)
-			}
-			if after != nil {
-				afterFunc.Call(out)
+				if after != nil {
+					afterFunc.Call(append(out, in...))
+				}
 			}
 			return
 		}
@@ -141,13 +147,19 @@ func checkInjection(targetType reflect.Type, before interface{}, after interface
 			err = fmt.Errorf("Only a function can be injected after.")
 			return
 		}
-		if afterFunc.Type().NumIn() != targetType.NumOut() {
-			err = fmt.Errorf("The input para number of the function injected after must be same with the output para number of the target function.")
+		if afterFunc.Type().NumIn() != targetType.NumOut()+targetType.NumIn() {
+			err = fmt.Errorf("The input para number of the function injected after must be equal to the sum of output and input para number of the target function.")
 			return
 		}
-		for i := 0; i < afterFunc.Type().NumIn(); i++ {
+		for i := 0; i < targetType.NumOut(); i++ {
 			if afterFunc.Type().In(i) != targetType.Out(i) {
 				err = fmt.Errorf("The input para types of the function injected after must be same with the output para types of the target function.")
+				return
+			}
+		}
+		for j := 0; j < targetType.NumIn(); j++ {
+			if afterFunc.Type().In(j+targetType.NumOut()) != targetType.In(j) {
+				err = fmt.Errorf("The input para types of the function injected after must be same with the input para types of the target function.")
 				return
 			}
 		}

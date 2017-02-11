@@ -21,7 +21,7 @@ This can be used to add behavior, such as logs or metrics, into a function witho
 | func Myfunc(in)out{ | func MyfuncDecorated(in)out{ |
 |     ......          |    injectedBefore(in)        |
 |     do someting     |    out = MyFunc(in)          |
-|     ......          |    injectedAfter(out)        |
+|     ......          |    injectedAfter(out,in)     |
 | }                   | }                            |
 
 ## Example
